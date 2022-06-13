@@ -97,21 +97,21 @@ result_dir = "./results"
 video_manager = ti.tools.VideoManager(output_dir=result_dir, framerate=24, automatic_build=False)
 
 series_prefix = "example.ply"
-for s in range(10):
-    update_U()
-    advance()
-    filename = f'fem_export{s}.png'
-    gui.circles(pos.to_numpy(), radius=2, color=0xffaa33)
-    gui.circle(ball_pos, radius=ball_radius * 512, color=0x666666)
-    video_manager.write_frame(gui.get_image())
-    gui.clear()
-    print(f'Frame {s} is recorded in {filename}')
-    
-    # export mesh
-    num_vertices = NV
-    np_pos = np.reshape(pos.to_numpy(), (num_vertices, 2))
-    writer = ti.tools.PLYWriter(num_vertices=num_vertices)
-    z = np.zeros(num_vertices, np.float32)
-    writer.add_vertex_pos(np_pos[:, 0], np_pos[:, 1], z)
-    writer.export_frame_ascii(s, series_prefix)
-    print(f'Frame {s} is recorded')
+for s in range(1000):
+    for i in range(30):
+        with ti.Tape(loss=U):
+            update_U()
+        advance()
+    if s%100 ==0:
+        gui.circles(pos.to_numpy(), radius=2, color=0xffaa33)
+        gui.circle(ball_pos, radius=ball_radius * 512, color=0x666666)
+        video_manager.write_frame(gui.get_image())
+        gui.clear()
+        # export mesh
+        num_vertices = NV
+        np_pos = np.reshape(pos.to_numpy(), (num_vertices, 2))
+        writer = ti.tools.PLYWriter(num_vertices=num_vertices)
+        z = np.zeros(num_vertices, np.float32)
+        writer.add_vertex_pos(np_pos[:, 0], np_pos[:, 1], z)
+        writer.export_frame_ascii(s, series_prefix)
+        print(f'Frame {s} is recorded')
